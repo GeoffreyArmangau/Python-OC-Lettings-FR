@@ -4,3 +4,4 @@ venv
 flake-report/
 .coverage
 .env
+docs/build/
