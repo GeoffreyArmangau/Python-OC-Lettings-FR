@@ -69,6 +69,57 @@ Dans le reste de la documentation sur le développement local, il est supposé q
 - Aller sur `http://localhost:8000/admin`
 - Connectez-vous avec l'utilisateur `admin`, mot de passe `Abc1234!`
 
+#### Surveillance des erreurs (Sentry)
+
+Le site utilise [Sentry](https://sentry.io) pour la surveillance des erreurs et la
+centralisation des logs applicatifs. Aucun identifiant Sentry n'est stocké dans le code
+source : tout passe par des variables d'environnement chargées depuis un fichier `.env`
+local (non versionné).
+
+##### Configurer Sentry pour la première fois
+
+1. Créer un compte sur [sentry.io](https://sentry.io) (ou utiliser un compte existant).
+2. Créer un nouveau projet, plateforme **Django**. Sur l'écran de création, activer au
+   minimum les fonctionnalités **Error monitoring** et **Logging** (les autres — Tracing,
+   Profiling, Application Metrics — ne sont pas utilisées par ce projet).
+3. Une fois le projet créé, Sentry affiche un DSN (une URL du type
+   `https://xxxx@xxxx.ingest.xx.sentry.io/xxxx`) : le copier.
+4. À la racine du projet (`Python-OC-Lettings-FR/`), copier `.env.example` vers `.env` :
+   - macOS/Linux : `cp .env.example .env`
+   - Windows (PowerShell) : `Copy-Item .env.example .env`
+5. Renseigner les variables dans `.env` :
+   - `SENTRY_DSN` : le DSN copié à l'étape 3.
+   - `DJANGO_SECRET_KEY` : une clé secrète Django propre à votre environnement (ne
+     jamais réutiliser une clé qui a déjà été commitée). Pour en générer une :
+     `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`
+6. Relancer le serveur (`python manage.py runserver`) : Sentry s'initialise
+   automatiquement au démarrage si `SENTRY_DSN` est renseigné.
+
+##### Vérifier que ça fonctionne
+
+- Visiter une URL de détail avec un identifiant inexistant, par exemple
+  `http://localhost:8000/lettings/99999/` ou `http://localhost:8000/profiles/personne-nexiste-pas/` :
+  la page 500 personnalisée doit s'afficher.
+- Dans le terminal qui exécute `runserver`, une ligne de log de niveau `ERROR` doit
+  apparaître (ex. `ERROR lettings.views Letting with id=99999 does not exist`).
+- Dans le tableau de bord Sentry (menu **Issues**), l'erreur correspondante
+  (`Letting.DoesNotExist` ou `Profile.DoesNotExist`) doit apparaître après quelques
+  secondes.
+
+##### Notes pour aller plus loin
+
+- Sentry est volontairement désactivé pendant l'exécution de la suite de tests
+  (`pytest`), pour ne pas polluer le tableau de bord avec les erreurs déclenchées
+  intentionnellement par les tests (voir `RUNNING_TESTS` dans
+  `oc_lettings_site/settings.py`).
+- Les niveaux de logs (quels messages sont gardés en contexte, lesquels déclenchent un
+  vrai incident Sentry) sont configurables via `LOGGING` et `LoggingIntegration` dans
+  `oc_lettings_site/settings.py`.
+- Pour ajouter des logs dans une nouvelle vue ou fonction, utiliser
+  `logger = logging.getLogger(__name__)` en haut du fichier, puis `logger.info(...)` /
+  `logger.error(...)` selon la gravité — voir `lettings/views.py` ou
+  `profiles/views.py` pour des exemples.
+
 ### Windows
 
 Utilisation de PowerShell, comme ci-dessus sauf :
