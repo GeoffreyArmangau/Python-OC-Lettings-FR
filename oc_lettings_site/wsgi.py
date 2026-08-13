@@ -1,3 +1,4 @@
+"""WSGI config for oc_lettings_site: exposes the WSGI callable as a module-level variable."""
 import os
 
 from django.core.wsgi import get_wsgi_application

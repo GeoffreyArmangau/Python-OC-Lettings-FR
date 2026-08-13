@@ -1,3 +1,4 @@
+"""Root URL configuration: home page, admin, and the lettings/profiles app namespaces."""
 from django.contrib import admin
 from django.urls import include, path
 

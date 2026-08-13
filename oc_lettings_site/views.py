@@ -1,3 +1,4 @@
+"""Views for the site's shared pages (currently just the home page)."""
 from django.shortcuts import render
 
 
@@ -11,4 +12,12 @@ from django.shortcuts import render
 # Nullam elementum urna nisi, pellentesque iaculis enim cursus in.
 # Praesent volutpat porttitor magna, non finibus neque cursus id.
 def index(request):
+    """Render the site's home page.
+
+    Parameters:
+        request: the HTTP request.
+
+    Returns:
+        HttpResponse rendering index.html.
+    """
     return render(request, 'index.html')

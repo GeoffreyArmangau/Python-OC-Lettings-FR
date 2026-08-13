@@ -1,3 +1,4 @@
+"""URL routes for the lettings app, mounted under the "lettings" namespace."""
 from django.urls import path
 
 from . import views

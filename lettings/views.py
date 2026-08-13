@@ -1,3 +1,4 @@
+"""Views for the lettings app: list and detail pages for rental listings."""
 from django.shortcuts import render
 from .models import Letting
 
@@ -8,6 +9,14 @@ from .models import Letting
 # Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Cras eget
 # scelerisque
 def index(request):
+    """Render the list of all lettings.
+
+    Parameters:
+        request: the HTTP request.
+
+    Returns:
+        HttpResponse rendering lettings/index.html with all Letting objects.
+    """
     lettings_list = Letting.objects.all()
     context = {'lettings_list': lettings_list}
     return render(request, 'lettings/index.html', context)
@@ -31,6 +40,18 @@ def index(request):
 # Donec quis nisi ligula.
 # Integer vehicula tincidunt enim, ac lacinia augue pulvinar sit amet.
 def letting(request, letting_id):
+    """Render the detail page for a single letting.
+
+    Parameters:
+        request: the HTTP request.
+        letting_id: primary key of the Letting to display.
+
+    Returns:
+        HttpResponse rendering lettings/letting.html with the listing's title and address.
+
+    Raises:
+        Letting.DoesNotExist: if no Letting matches letting_id (results in a 500 error page).
+    """
     letting = Letting.objects.get(id=letting_id)
     context = {
         'title': letting.title,
