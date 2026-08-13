@@ -1,0 +1,13 @@
+venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+.git/
+.gitignore
+.env
+.env.example
+.coverage
+.coveragerc
+flake-report/
+staticfiles/
+.pytest_cache/
