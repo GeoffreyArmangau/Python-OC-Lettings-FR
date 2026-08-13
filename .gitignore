@@ -3,3 +3,4 @@
 venv
 flake-report/
 .coverage
+.env

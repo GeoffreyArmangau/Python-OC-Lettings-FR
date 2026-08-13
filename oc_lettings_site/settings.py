@@ -1,17 +1,39 @@
 """Django settings for the oc_lettings_site project."""
 import os
+import sys
 
 from pathlib import Path
 
+import sentry_sdk
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from a local .env file (not committed, see .env.example).
+load_dotenv(BASE_DIR / '.env')
+
+# Skip Sentry when running under pytest: the test suite deliberately triggers
+# exceptions (e.g. DoesNotExist, the 500 page), which would otherwise be reported
+# to Sentry as real incidents on every test run.
+RUNNING_TESTS = 'pytest' in sys.modules
+
+if not RUNNING_TESTS:
+    sentry_sdk.init(
+        dsn=os.environ.get('SENTRY_DSN'),
+        # Add data like request headers and IP for users,
+        # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+        send_default_pii=True,
+        # Enable sending logs to Sentry
+        enable_logs=True,
+    )
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'fp$9^593hsriajg$_%=5trot9g!1qa@ew(o-1#@=&4%=hp46(s'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
