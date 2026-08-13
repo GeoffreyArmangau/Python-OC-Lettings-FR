@@ -126,3 +126,79 @@ Utilisation de PowerShell, comme ci-dessus sauf :
 
 - Pour activer l'environnement virtuel, `.\venv\Scripts\Activate.ps1` 
 - Remplacer `which <my-command>` par `(Get-Command <my-command>).Path`
+
+## Déploiement
+
+### Récapitulatif
+
+Le déploiement est entièrement automatisé par un pipeline GitHub Actions
+(`.github/workflows/ci-cd.yml`), composé de 3 étapes :
+
+1. **Build & test** : à chaque `push`, sur n'importe quelle branche, installe les
+   dépendances, lance le linting (`flake8`) et la suite de tests avec vérification de la
+   couverture (`pytest --cov-fail-under=80`).
+2. **Conteneurisation** : uniquement sur la branche `master`, et seulement si l'étape
+   précédente réussit, construit l'image Docker et la pousse sur Docker Hub, avec deux
+   tags : `latest` et le hash du commit.
+3. **Déploiement** : uniquement sur `master`, et seulement si la conteneurisation
+   réussit, appelle le "Deploy Hook" de Render pour déclencher le déploiement de la
+   nouvelle image.
+
+Un push sur une autre branche que `master` ne déclenche donc que le linting et les
+tests, jamais la conteneurisation ni le déploiement.
+
+### Configuration requise
+
+- Un dépôt sur [Docker Hub](https://hub.docker.com) pour héberger l'image (ce projet
+  utilise `ageoff/python-oc-lettings-fr`).
+- Un service web sur [Render](https://render.com), de type "Deploy an existing image
+  from a registry", pointant vers ce dépôt Docker Hub.
+- Sur ce service Render, les variables d'environnement suivantes :
+  - `DJANGO_SECRET_KEY` : une clé secrète propre à l'environnement de production (ne
+    jamais réutiliser une clé qui a déjà été commitée dans l'historique Git).
+  - `DJANGO_DEBUG` : `False`.
+  - `SENTRY_DSN` : optionnel mais recommandé, voir la section Sentry ci-dessus.
+- Dans les paramètres GitHub du dépôt (**Settings > Secrets and variables >
+  Actions**), 3 secrets :
+  - `DOCKERHUB_USERNAME` : le nom d'utilisateur Docker Hub.
+  - `DOCKERHUB_TOKEN` : un jeton d'accès Docker Hub dédié (droits Read & Write), pas le
+    mot de passe du compte — à générer sur
+    [hub.docker.com/settings/security](https://hub.docker.com/settings/security).
+  - `RENDER_DEPLOY_HOOK_URL` : l'URL du "Deploy Hook" du service Render (visible dans
+    **Settings > Deploy** du service).
+
+### Étapes pour mettre en place le déploiement (à faire une seule fois)
+
+1. Créer le dépôt sur Docker Hub.
+2. Construire et pousser une première image manuellement — Render a besoin qu'une
+   image existe déjà pour pouvoir créer un service qui pointe dessus :
+   ```
+   docker build -t <utilisateur>/<depot>:latest .
+   docker push <utilisateur>/<depot>:latest
+   ```
+3. Créer le Web Service sur Render à partir de cette image, avec les variables
+   d'environnement listées ci-dessus.
+4. Récupérer l'URL du Deploy Hook du service Render.
+5. Ajouter les 3 secrets GitHub listés ci-dessus.
+6. Pousser sur `master` : le pipeline se charge de tous les déploiements suivants
+   automatiquement, sans autre intervention manuelle.
+
+### Vérifier qu'un déploiement s'est bien passé
+
+- Ouvrir l'URL publique du service Render et vérifier que les pages se chargent
+  normalement.
+- Vérifier que les fichiers statiques (CSS, images) s'affichent correctement — c'est un
+  site destiné aux consommateurs, l'apparence doit être identique à ce qui est vu en
+  local.
+- Vérifier que l'interface d'administration (`/admin/`) a le même rendu qu'en local (le
+  CTO l'utilise fréquemment).
+
+### Récupérer et lancer l'image en local avec Docker (une seule commande)
+
+```
+docker run -p 8000:8000 --env-file .env <utilisateur>/<depot>:latest
+```
+
+Cette commande télécharge l'image depuis Docker Hub si elle n'est pas déjà présente en
+local, puis démarre le site — accessible sur `http://localhost:8000`. Le fichier `.env`
+doit contenir au minimum `DJANGO_SECRET_KEY` (voir `.env.example`).
