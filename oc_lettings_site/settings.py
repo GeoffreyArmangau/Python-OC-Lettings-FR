@@ -1,4 +1,5 @@
 """Django settings for the oc_lettings_site project."""
+import logging
 import os
 import sys
 
@@ -6,6 +7,7 @@ from pathlib import Path
 
 import sentry_sdk
 from dotenv import load_dotenv
+from sentry_sdk.integrations.logging import LoggingIntegration
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,6 +28,12 @@ if not RUNNING_TESTS:
         send_default_pii=True,
         # Enable sending logs to Sentry
         enable_logs=True,
+        integrations=[
+            LoggingIntegration(
+                level=logging.INFO,    # INFO and above are kept as breadcrumbs
+                event_level=logging.ERROR,  # ERROR and above are also sent as Sentry events
+            ),
+        ],
     )
 
 
@@ -139,3 +147,56 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static",]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+
+# Logging
+# https://docs.djangoproject.com/en/6.1/topics/logging/
+# Sentry's LoggingIntegration (configured above) listens on the root logger, so any
+# logger below also reaches Sentry automatically, on top of being printed to the console.
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} {levelname} {name} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+    'loggers': {
+        # Django's own framework logs (requests, DB, security warnings, ...).
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # Application loggers: one per app, used explicitly in views/models via
+        # logging.getLogger(__name__). INFO here surfaces normal but noteworthy events
+        # (e.g. a record not found), not just failures.
+        'lettings': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'profiles': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'oc_lettings_site': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}

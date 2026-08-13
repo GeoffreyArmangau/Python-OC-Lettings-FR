@@ -1,6 +1,10 @@
 """Views for the lettings app: list and detail pages for rental listings."""
+import logging
+
 from django.shortcuts import render
 from .models import Letting
+
+logger = logging.getLogger(__name__)
 
 
 # Aenean leo magna, vestibulum et tincidunt fermentum, consectetur quis velit.
@@ -18,6 +22,7 @@ def index(request):
         HttpResponse rendering lettings/index.html with all Letting objects.
     """
     lettings_list = Letting.objects.all()
+    logger.info("Listing %d letting(s)", lettings_list.count())
     context = {'lettings_list': lettings_list}
     return render(request, 'lettings/index.html', context)
 
@@ -52,7 +57,11 @@ def letting(request, letting_id):
     Raises:
         Letting.DoesNotExist: if no Letting matches letting_id (results in a 500 error page).
     """
-    letting = Letting.objects.get(id=letting_id)
+    try:
+        letting = Letting.objects.get(id=letting_id)
+    except Letting.DoesNotExist:
+        logger.error("Letting with id=%s does not exist", letting_id)
+        raise
     context = {
         'title': letting.title,
         'address': letting.address,

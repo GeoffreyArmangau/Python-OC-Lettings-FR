@@ -1,6 +1,10 @@
 """Views for the profiles app: list and detail pages for user profiles."""
+import logging
+
 from django.shortcuts import render
 from .models import Profile
+
+logger = logging.getLogger(__name__)
 
 
 # Sed placerat quam in pulvinar commodo.
@@ -16,6 +20,7 @@ def index(request):
         HttpResponse rendering profiles/index.html with all Profile objects.
     """
     profiles_list = Profile.objects.all()
+    logger.info("Listing %d profile(s)", profiles_list.count())
     context = {'profiles_list': profiles_list}
     return render(request, 'profiles/index.html', context)
 
@@ -39,6 +44,10 @@ def profile(request, username):
     Raises:
         Profile.DoesNotExist: if no Profile matches username (results in a 500 error page).
     """
-    profile = Profile.objects.get(user__username=username)
+    try:
+        profile = Profile.objects.get(user__username=username)
+    except Profile.DoesNotExist:
+        logger.error("Profile with username=%s does not exist", username)
+        raise
     context = {'profile': profile}
     return render(request, 'profiles/profile.html', context)
