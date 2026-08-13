@@ -1,0 +1,7 @@
+[run]
+omit =
+    */tests.py
+    manage.py
+    */wsgi.py
+    */asgi.py
+    venv/*
