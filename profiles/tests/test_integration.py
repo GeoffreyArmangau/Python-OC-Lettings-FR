@@ -1,24 +1,15 @@
-"""Tests for the profiles app: models, URLs and views."""
+"""Integration tests for the profiles app: URL routing and views (full request/response cycle)."""
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Profile
+from ..models import Profile
 
 
 def create_profile(username='jdoe', favorite_city='Paris'):
     """Create and return a Profile (with its User) for use in tests."""
     user = User.objects.create_user(username=username, password='pass1234')
     return Profile.objects.create(user=user, favorite_city=favorite_city)
-
-
-class ProfileModelTests(TestCase):
-    """Tests for the Profile model."""
-
-    def test_str_returns_username(self):
-        """__str__ returns the associated user's username."""
-        profile = create_profile(username='jdoe')
-        self.assertEqual(str(profile), 'jdoe')
 
 
 class ProfilesUrlTests(TestCase):

@@ -1,4 +1,4 @@
-"""Tests for the oc_lettings_site app: home page, root URL and custom error pages."""
+"""Integration tests for the oc_lettings_site app: home page, root URL and custom error pages."""
 from django.test import Client, TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
