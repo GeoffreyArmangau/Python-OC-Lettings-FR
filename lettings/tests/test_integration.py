@@ -1,8 +1,8 @@
-"""Tests for the lettings app: models, URLs and views."""
+"""Integration tests for the lettings app: URL routing and views (full request/response cycle)."""
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Address, Letting
+from ..models import Address, Letting
 
 
 def create_address():
@@ -20,28 +20,6 @@ def create_address():
 def create_letting(title):
     """Create and return a Letting (with its own Address) for use in tests."""
     return Letting.objects.create(title=title, address=create_address())
-
-
-class AddressModelTests(TestCase):
-    """Tests for the Address model."""
-
-    def test_str_returns_number_and_street(self):
-        """__str__ returns "<number> <street>"."""
-        address = create_address()
-        self.assertEqual(str(address), '12 Main Street')
-
-    def test_verbose_name_plural_is_addresses(self):
-        """The admin plural label is fixed to "Addresses" (not the default "Addresss")."""
-        self.assertEqual(Address._meta.verbose_name_plural, 'Addresses')
-
-
-class LettingModelTests(TestCase):
-    """Tests for the Letting model."""
-
-    def test_str_returns_title(self):
-        """__str__ returns the letting's title."""
-        letting = create_letting(title='Cozy Cabin')
-        self.assertEqual(str(letting), 'Cozy Cabin')
 
 
 class LettingsUrlTests(TestCase):
