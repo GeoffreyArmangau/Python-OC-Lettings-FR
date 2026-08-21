@@ -1,10 +1,17 @@
-OC Lettings — Documentation technique
+OC Lettings — Technical documentation
 ======================================
 
-Site web de location de logements de vacances, développé avec Django.
+Vacation rental website, built with Django.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Sommaire
+   :caption: Contents
 
    description
+   installation
+   quickstart
+   technologies
+   database
+   api
+   usage
+   deployment

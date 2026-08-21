@@ -1,41 +1,40 @@
-Description du projet
+Project description
 ======================
 
-OC Lettings est une application web développée avec le framework Django, destinée à
-une agence de location de logements de vacances. Elle permet aux visiteurs de
-consulter les locations disponibles ainsi que les profils des utilisateurs associés,
-et met à disposition une interface d'administration pour gérer ces données au
-quotidien.
+OC Lettings is a web application built with the Django framework, designed for a
+vacation rental agency. It lets visitors browse the available rentals and the
+associated user profiles, and provides an admin interface to manage this data on a
+day-to-day basis.
 
-L'application est organisée en plusieurs modules indépendants, chacun responsable
-d'un domaine précis du site.
+The application is organized into several independent modules, each responsible for
+a specific area of the site.
 
-Application oc_lettings_site
+oc_lettings_site application
 ------------------------------
 
-Cette application constitue le socle du projet. Elle regroupe la configuration
-générale du site (paramètres Django, routage principal), la page d'accueil, ainsi que
-les pages d'erreur personnalisées (404 et 500), afin de garantir une expérience
-cohérente même en cas de problème.
+This application forms the backbone of the project. It gathers the site's general
+configuration (Django settings, main routing), the home page, and the custom error
+pages (404 and 500), ensuring a consistent experience even when something goes
+wrong.
 
-Application lettings
+lettings application
 ----------------------
 
-L'application Lettings est responsable de tout ce qui concerne les logements proposés
-à la location. Elle permet de consulter la liste des locations disponibles ainsi que
-le détail de chacune d'entre elles, notamment son titre et son adresse.
+The Lettings application handles everything related to the properties available for
+rent. It allows browsing the list of available rentals as well as the detail of each
+one, including its title and address.
 
-Application profiles
+profiles application
 ----------------------
 
-L'application Profiles gère les profils des utilisateurs du site. Elle permet de
-consulter la liste des profils enregistrés ainsi que les informations propres à
-chaque utilisateur, telles que sa ville favorite.
+The Profiles application manages the site's user profiles. It allows browsing the
+list of registered profiles as well as the information specific to each user, such
+as their favorite city.
 
 Infrastructure
 ----------------
 
-Le site est conteneurisé avec Docker, ce qui garantit un environnement d'exécution
-identique entre le développement local et la production. Son déploiement est
-automatisé par un pipeline d'intégration et de livraison continues, et son bon
-fonctionnement est surveillé en production grâce à l'outil Sentry.
+The site is containerized with Docker, ensuring an identical runtime environment
+between local development and production. Its deployment is automated through a
+continuous integration and delivery pipeline, and its health in production is
+monitored using Sentry.
